@@ -1,38 +1,76 @@
+# retro
 import argparse, retro, threading, os, numpy, time, random
+
+# dequeue
 from collections import deque
 
+# keras (like pytorch)
 from tensorflow.python import keras
+
+# keras has load model
 from keras.models import load_model
 
+# some agent move
 from DefaultMoveList import Moves
 
-class Agent():
-    """ Abstract class that user created Agents should inherit from.
-        Contains helper functions for launching training environments and generating training data sets.
+
+class Agent:
+    """Abstract class that user created Agents should inherit from.
+    Contains helper functions for launching training environments and generating training data sets.
+    """
+
+    """
+        [
+            0: OBSERVATION,         # image/frame at time t
+            1: STATE,               # internal game state at time t
+            2: ACTION,              # action taken at time t
+            3: REWARD,              # reward received from that action
+            4: NEXT_OBSERVATION,    # image/frame at time t+1
+            5: NEXT_STATE,          # internal state at time t+1
+            6: DONE                 # episode completion flag
+        ]
+
     """
 
     # Global constants keeping track of some input lag for some directional movements
     # Moves following these inputs will not be picked up unless input after the lag
 
     # The indices representing what each index in a training point represent
-    OBSERVATION_INDEX = 0                                                                          # The current display image of the game state
-    STATE_INDEX = 1                                                                                # The state the agent was presented with    
-    ACTION_INDEX = 2                                                                               # The action the agent took
-    REWARD_INDEX = 3                                                                               # The reward the agent received for that action
-    NEXT_OBSERVATION_INDEX = 4                                                                     # The current display image of the new state the action led to
-    NEXT_STATE_INDEX = 5                                                                           # The next state that the action led to
-    DONE_INDEX = 6                                                                                 # A flag signifying if the game is over
 
-    MAX_DATA_LENGTH = 50000                                                                        # Max number of decision frames the Agent can remember from a fight, average is about 2000 per fight
+    # a single frame?
+    OBSERVATION_INDEX = 0  # The current display image of the game state
 
-    DEFAULT_MODELS_DIR_PATH = '../models'                                                          # Default path to the dir where the trained models are saved for later access
-    DEFAULT_LOGS_DIR_PATH = '../logs'                                                              # Default path to the dir where training logs are saved for user review
+    # agent state?
+    STATE_INDEX = 1  # The state the agent was presented with
 
-    ### End of static variables 
+    # agent takes this action
+    ACTION_INDEX = 2  # The action the agent took
+
+    # agent takes this reward
+    REWARD_INDEX = 3  # The reward the agent received for that action
+
+    # the next obs index
+    NEXT_OBSERVATION_INDEX = (
+        4  # The current display image of the new state the action led to
+    )
+
+    # next state index
+    NEXT_STATE_INDEX = 5  # The next state that the action led to
+
+    # done index
+    DONE_INDEX = 6  # A flag signifying if the game is over
+
+    # max frame agent can remember
+    MAX_DATA_LENGTH = 50000  # Max number of decision frames the Agent can remember from a fight, average is about 2000 per fight
+
+    DEFAULT_MODELS_DIR_PATH = "../models"  # Default path to the dir where the trained models are saved for later access
+    DEFAULT_LOGS_DIR_PATH = "../logs"  # Default path to the dir where training logs are saved for user review
+
+    ### End of static variables
 
     ### Object methods
 
-    def __init__(self, load= False, name= None, moveList= Moves):
+    def __init__(self, load=False, name=None, moveList=Moves):
         """Initializes the agent and the underlying neural network
 
         Parameters
@@ -51,18 +89,25 @@ class Agent():
         -------
         None
         """
-        if name is None: self.name = self.__class__.__name__
-        else: self.name = name
+        if name is None:
+            self.name = self.__class__.__name__
+        else:
+            self.name = name
         self.prepareForNextFight()
         self.moveList = moveList
 
         if self.__class__.__name__ != "Agent":
-            self.model = self.initializeNetwork()    								            # Only invoked in child subclasses, Agent has no network
-            if load: self.loadModel()
+            self.model = (
+                self.initializeNetwork()
+            )  # Only invoked in child subclasses, Agent has no network
+            if load:
+                self.loadModel()
 
     def prepareForNextFight(self):
         """Clears the memory of the fighter so it can prepare to record the next fight"""
-        self.memory = deque(maxlen= Agent.MAX_DATA_LENGTH)                                     # Double ended queue that stores states during the game
+        self.memory = deque(
+            maxlen=Agent.MAX_DATA_LENGTH
+        )  # Double ended queue that stores states during the game
 
     def getRandomMove(self, info):
         """Returns a random set of button inputs
@@ -79,10 +124,12 @@ class Agent():
 
         frameInputs
             A set of frame inputs where each number corresponds to a set of button inputs in the action space.
-        """ 
-        moveName = random.choice(list(self.moveList))                                          # Take random sample of all the button press inputs the Agent could make
-        frameInputs = self.convertMoveToFrameInputs(moveName, info)                                                   
-        return moveName.value, frameInputs                                
+        """
+        moveName = random.choice(
+            list(self.moveList)
+        )  # Take random sample of all the button press inputs the Agent could make
+        frameInputs = self.convertMoveToFrameInputs(moveName, info)
+        return moveName.value, frameInputs
 
     def convertMoveToFrameInputs(self, move, info):
         """Converts the desired move into a series of frame inputs in order to acomplish that move
@@ -120,7 +167,7 @@ class Agent():
 
         info
             Information about the current game state we will pull the player
-            and opponent position from 
+            and opponent position from
 
         Returns
         -------
@@ -131,7 +178,7 @@ class Agent():
         if not self.moveList.isDirectionalMove(move):
             return frameInputs
 
-        if info['x_position'] < info['enemy_x_position']:
+        if info["x_position"] < info["enemy_x_position"]:
             return frameInputs[0]
         else:
             return frameInputs[1]
@@ -171,12 +218,16 @@ class Agent():
         -------
         None
         """
-        self.memory.append(step) # Steps are stored as tuples to avoid unintended changes
+        self.memory.append(
+            step
+        )  # Steps are stored as tuples to avoid unintended changes
 
     def reviewFight(self):
         """The Agent goes over the data collected from it's last fight, prepares it, and then runs through one epoch of training on the data"""
         data = self.prepareMemoryForTraining(self.memory)
-        self.model = self.trainNetwork(data, self.model)   		                           # Only invoked in child subclasses, Agent does not learn
+        self.model = self.trainNetwork(
+            data, self.model
+        )  # Only invoked in child subclasses, Agent does not learn
         self.saveModel()
         self.prepareForNextFight()
 
@@ -190,7 +241,9 @@ class Agent():
         -------
         None
         """
-        self.model.load_weights(os.path.join(Agent.DEFAULT_MODELS_DIR_PATH, self.getModelName()))
+        self.model.load_weights(
+            os.path.join(Agent.DEFAULT_MODELS_DIR_PATH, self.getModelName())
+        )
         print("Model successfully loaded")
 
     def saveModel(self):
@@ -203,15 +256,19 @@ class Agent():
         -------
         None
         """
-        self.model.save_weights(os.path.join(Agent.DEFAULT_MODELS_DIR_PATH, self.getModelName()))
-        print('Checkpoint established. model successfully saved')
-        with open(os.path.join(Agent.DEFAULT_LOGS_DIR_PATH, self.getLogsName()), 'a+') as file:
+        self.model.save_weights(
+            os.path.join(Agent.DEFAULT_MODELS_DIR_PATH, self.getModelName())
+        )
+        print("Checkpoint established. model successfully saved")
+        with open(
+            os.path.join(Agent.DEFAULT_LOGS_DIR_PATH, self.getLogsName()), "a+"
+        ) as file:
             file.write(str(sum(self.lossHistory.losses) / len(self.lossHistory.losses)))
-            file.write('\n')
+            file.write("\n")
 
     def getModelName(self):
         """Returns the formatted model name for the current model"""
-        return  self.name + "Model"
+        return self.name + "Model"
 
     def getLogsName(self):
         """Returns the formatted log name for the current model"""
@@ -245,7 +302,7 @@ class Agent():
 
     def initializeNetwork(self):
         """To be implemented in child class, should initialize or load in the Agent's neural network
-        
+
         Parameters
         ----------
         None
@@ -256,10 +313,10 @@ class Agent():
             A newly initialized model that the Agent will use when generating moves
         """
         raise NotImplementedError("Implement this is in the inherited agent")
-    
+
     def prepareMemoryForTraining(self, memory):
         """To be implemented in child class, should prepare the recorded fight sequences into training data
-        
+
         Parameters
         ----------
         memory
@@ -279,7 +336,7 @@ class Agent():
         ----------
         data
             The training data for the model
-        
+
         model
             The model for the function to train
 
@@ -294,11 +351,17 @@ class Agent():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Processes agent parameters.')
-    parser.add_argument('-r', '--render', action= 'store_true', help= 'Boolean flag for if the user wants the game environment to render during play')
+    parser = argparse.ArgumentParser(description="Processes agent parameters.")
+    parser.add_argument(
+        "-r",
+        "--render",
+        action="store_true",
+        help="Boolean flag for if the user wants the game environment to render during play",
+    )
     args = parser.parse_args()
     from Lobby import Lobby
-    testLobby = Lobby(render= args.render)
+
+    testLobby = Lobby(render=args.render)
     agent = Agent()
     testLobby.addPlayer(agent)
     testLobby.executeTrainingRun()

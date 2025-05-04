@@ -1,8 +1,11 @@
 from enum import Enum
 import random
 
+
+# many moves + special moves
 class Moves(Enum):
     """Enum of the set of possible moves the agent is allowed to perform"""
+
     Idle = 0
     Right = 1
     DownRight = 2
@@ -35,7 +38,7 @@ class Moves(Enum):
     def getMoveInputs(moveName):
         """Takes in the enum moveName and returns the set of frame inputs to perform that move"""
         return MovesDict[moveName]
-    
+
     def getRandomMove():
         """Returns the name and frame inputs of a randomly selected move"""
         moveName = random.choice(list(Moves))
@@ -44,8 +47,13 @@ class Moves(Enum):
 
     def isDirectionalMove(move):
         """Determines if the selected move's inputs are depend on the players direction"""
-        if move == Moves.Fireball or move == Moves.HurricaneKick or move == Moves.DragonUppercut:
+        if (
+            move == Moves.Fireball
+            or move == Moves.HurricaneKick
+            or move == Moves.DragonUppercut
+        ):
             return True
+
 
 """
     Dictionary mapping the move enum types to the set of frame inputs
@@ -53,46 +61,41 @@ class Moves(Enum):
     one for each possible input direction.
 """
 MovesDict = {
-    Moves.Idle : [0],
-
+    Moves.Idle: [0],
     # Movement/Directional Inputs
-    Moves.Right : [6],
-    Moves.DownRight : [8],
-    Moves.Down : [2],
-    Moves.DownLeft : [5],
-    Moves.Left : [3],
-    Moves.UpLeft : [4],
-    Moves.Up : [1],
-    Moves.UpRight : [7],
-
+    Moves.Right: [6],
+    Moves.DownRight: [8],
+    Moves.Down: [2],
+    Moves.DownLeft: [5],
+    Moves.Left: [3],
+    Moves.UpLeft: [4],
+    Moves.Up: [1],
+    Moves.UpRight: [7],
     # Basic attacks
-    Moves.LightPunch : [26],
-    Moves.MediumPunch : [21],
-    Moves.HeavyPunch : [32],
-    Moves.LightKick : [13],
-    Moves.MediumKick : [9],
-    Moves.HeavyKick : [17],
-
+    Moves.LightPunch: [26],
+    Moves.MediumPunch: [21],
+    Moves.HeavyPunch: [32],
+    Moves.LightKick: [13],
+    Moves.MediumKick: [9],
+    Moves.HeavyKick: [17],
     # Crouch Attacks
-    Moves.CrouchLightPunch : [2, 27],
-    Moves.CrouchMediumPunch : [2, 22],
-    Moves.CrouchHeavyPunch : [2, 33],
-    Moves.CrouchLightKick : [2, 14],
-    Moves.CrouchMediumKick : [2, 10],
-    Moves.CrouchHeavyKick : [2, 18],
-
+    Moves.CrouchLightPunch: [2, 27],
+    Moves.CrouchMediumPunch: [2, 22],
+    Moves.CrouchHeavyPunch: [2, 33],
+    Moves.CrouchLightKick: [2, 14],
+    Moves.CrouchMediumKick: [2, 10],
+    Moves.CrouchHeavyKick: [2, 18],
     # Throws
-    Moves.LeftShoulderThrow : [34],
-    Moves.RightShoulderThrow : [36],
-    Moves.LeftSomersaultThrow : [19],
-    Moves.RightSomersaultThrow : [20],
-
+    Moves.LeftShoulderThrow: [34],
+    Moves.RightShoulderThrow: [36],
+    Moves.LeftSomersaultThrow: [19],
+    Moves.RightSomersaultThrow: [20],
     # Special Moves
-    Moves.Fireball : [[2, 8, 30], [2, 5, 28]],
-    Moves.HurricaneKick : [[2, 5, 19 ], [2, 8, 20]],
-    Moves.DragonUppercut : [[6, 2, 37], [3, 2, 35]]
+    Moves.Fireball: [[2, 8, 30], [2, 5, 28]],
+    Moves.HurricaneKick: [[2, 5, 19], [2, 8, 20]],
+    Moves.DragonUppercut: [[6, 2, 37], [3, 2, 35]],
 }
-    
+
 
 if __name__ == "__main__":
     for move in Moves:
