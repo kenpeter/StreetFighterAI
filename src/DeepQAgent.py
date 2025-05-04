@@ -17,13 +17,21 @@ from collections import deque
 class DeepQAgent(Agent):
     """An agent that implements the Deep Q Neural Network Reinforcement Algorithm to learn street fighter 2"""
 
+    # so full train still 10% to explode
     EPSILON_MIN = 0.1  # Minimum exploration rate for a trained model
+
+    # decrease slowly (become deterministic)
     DEFAULT_EPSILON_DECAY = (
         0.999  # How fast the exploration rate falls as training persists
     )
+
+    # Q(s, a) = r + γ * max(Q(s’, a’))
     DEFAULT_DISCOUNT_RATE = (
         0.98  # How much future rewards influence the current decision of the model
     )
+
+    # 1. big val, learn fast, unstable
+    # 2. small val, learn slow, stable
     DEFAULT_LEARNING_RATE = 0.0001
 
     """
@@ -61,8 +69,10 @@ class DeepQAgent(Agent):
     """
     doneKeys = [0, 528, 530, 1024, 1026, 1028, 1030, 1032]
 
+    # action button
     ACTION_BUTTONS = ["X", "Y", "Z", "A", "B", "C"]
 
+    # can tailor for huge err and small err
     def _huber_loss(y_true, y_pred, clip_delta=1.0):
         """Implementation of huber loss to use as the loss function for the model"""
         error = y_true - y_pred

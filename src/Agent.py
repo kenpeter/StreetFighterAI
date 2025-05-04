@@ -103,12 +103,15 @@ class Agent:
             if load:
                 self.loadModel()
 
+    # remember the fight
     def prepareForNextFight(self):
         """Clears the memory of the fighter so it can prepare to record the next fight"""
         self.memory = deque(
             maxlen=Agent.MAX_DATA_LENGTH
         )  # Double ended queue that stores states during the game
 
+    # get random move
+    # so a move contains multi frame
     def getRandomMove(self, info):
         """Returns a random set of button inputs
 
@@ -185,6 +188,7 @@ class Agent:
 
         return frameInputs
 
+    # obs, state, last action, reward, next obs, next state, done
     def recordStep(self, step):
         """Records the last observation, action, reward and the resultant observation about the environment for later training
         Parameters
@@ -222,6 +226,7 @@ class Agent:
             step
         )  # Steps are stored as tuples to avoid unintended changes
 
+    # review a fight
     def reviewFight(self):
         """The Agent goes over the data collected from it's last fight, prepares it, and then runs through one epoch of training on the data"""
         data = self.prepareMemoryForTraining(self.memory)
@@ -231,6 +236,7 @@ class Agent:
         self.saveModel()
         self.prepareForNextFight()
 
+    # load the model
     def loadModel(self):
         """Loads in pretrained model object ../models/{Instance_Name}Model
         Parameters
@@ -314,6 +320,7 @@ class Agent:
         """
         raise NotImplementedError("Implement this is in the inherited agent")
 
+    # record a fight sequence for training, so repeated watch the tape?
     def prepareMemoryForTraining(self, memory):
         """To be implemented in child class, should prepare the recorded fight sequences into training data
 
