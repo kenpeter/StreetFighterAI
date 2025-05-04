@@ -188,7 +188,7 @@ class Agent:
 
         return frameInputs
 
-    # obs, state, last action, reward, next obs, next state, done
+    # step = [obs, state, last action, reward, next obs, next state, done]
     def recordStep(self, step):
         """Records the last observation, action, reward and the resultant observation about the environment for later training
         Parameters
@@ -366,9 +366,14 @@ if __name__ == "__main__":
         help="Boolean flag for if the user wants the game environment to render during play",
     )
     args = parser.parse_args()
+    # import lobby class
     from Lobby import Lobby
 
+    # test lobby
     testLobby = Lobby(render=args.render)
+    # agent
     agent = Agent()
+    # add player
     testLobby.addPlayer(agent)
+    # execute training
     testLobby.executeTrainingRun()

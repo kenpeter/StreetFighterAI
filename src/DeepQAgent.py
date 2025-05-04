@@ -157,6 +157,7 @@ class DeepQAgent(Agent):
             frameInputs = self.convertMoveToFrameInputs(list(self.moveList)[move], info)
             return move, frameInputs
 
+    # init the network
     def initializeNetwork(self):
         """Initializes a Neural Net for a Deep-Q learning Model
 
@@ -355,4 +356,6 @@ if __name__ == "__main__":
 
     testLobby = Lobby(render=args.render)
     testLobby.addPlayer(qAgent)
+
+    # in test lobby, we execute training run
     testLobby.executeTrainingRun(episodes=args.episodes)
